@@ -53,7 +53,7 @@ class LeaderboardEntry(BaseModel):
     username: str
     completion_time: int
     attempts_count: int
-    completed_at: datetime
+    completed_at: Optional[datetime] = None
     
     class Config:
         from_attributes = True

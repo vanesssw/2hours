@@ -260,19 +260,25 @@ def get_user_sessions(username: str, db: Session = Depends(get_db)):
 
 @app.get("/api/leaderboard", response_model=List[LeaderboardEntry])
 def get_leaderboard(limit: int = 10, db: Session = Depends(get_db)):
-    """Get top players by attempts count (fewer attempts = better rank)"""
-    # Update ranks based on attempts_count (ascending - fewer is better)
-    entries = db.query(Leaderboard).order_by(
-        Leaderboard.attempts_count.asc()
-    ).all()
+    """Get all active players ranked by attempts count"""
+    # Get all users with at least one attempt, ordered by attempts (ascending)
+    users = db.query(User).filter(
+        User.total_attempts > 0
+    ).order_by(
+        User.total_attempts.asc()
+    ).limit(limit).all()
     
-    # Assign ranks
-    for idx, entry in enumerate(entries, start=1):
-        entry.rank = idx
-    db.commit()
+    # Build leaderboard entries
+    result = []
+    for idx, user in enumerate(users, start=1):
+        result.append(LeaderboardEntry(
+            rank=idx,
+            username=user.username,
+            attempts_count=user.total_attempts,
+            completion_time=0  # Not relevant for active players
+        ))
     
-    # Return top N
-    return entries[:limit]
+    return result
 
 @app.get("/api/stats", response_model=StatsResponse)
 def get_statistics(username: str = None, db: Session = Depends(get_db)):

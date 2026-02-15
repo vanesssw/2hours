@@ -108,8 +108,8 @@ html,body{width:100%;height:100%;background:#000;color:#fff;overflow-x:hidden}
       </button>
     </div>
     <div class="chip">
-      X: <span class="chip-val">@XACCOUNT</span>
-      <a href="https://x.com/XACCOUNT" target="_blank" class="chip-btn">
+      X: <span class="chip-val">@crackisonline</span>
+      <a href="https://x.com/crackisonline" target="_blank" class="chip-btn">
         <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
         Open
       </a>
@@ -140,58 +140,7 @@ html,body{width:100%;height:100%;background:#000;color:#fff;overflow-x:hidden}
 
 <div class="toast" id="toast">Copied</div>
 
-<script type="text/javascript">
-!function(){var u=window.UnicornStudio;if(u&&u.init){if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){u.init()})}else{u.init()}}else{window.UnicornStudio={isInitialized:!1};var i=document.createElement("script");i.src="https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v2.0.5/dist/unicornStudio.umd.js",i.onload=function(){if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){UnicornStudio.init()})}else{UnicornStudio.init()}},(document.head||document.body).appendChild(i)}}();
-</script>
-<script>
-function copyCA(){navigator.clipboard.writeText('SOON').then(()=>{const t=document.getElementById('toast');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1500)})}
-function openM(){document.getElementById('modal').classList.add('on');setTimeout(()=>document.getElementById('uInput').focus(),200)}
-function closeM(){document.getElementById('modal').classList.remove('on')}
-document.getElementById('uInput').addEventListener('input',function(){document.getElementById('goBtn').disabled=this.value.trim().length<2});
-document.getElementById('uInput').addEventListener('keydown',function(e){if(e.key==='Enter'&&this.value.trim().length>=2)go()});
-
-// API URL работает с Docker (через nginx proxy) и локально
-const API_URL=window.location.hostname==='localhost'&&window.location.port===''?'http://localhost:8000':'';
-
-async function go(){
-  const u=document.getElementById('uInput').value.trim();
-  if(u.length<2)return;
-  
-  const btn=document.getElementById('goBtn');
-  btn.disabled=true;
-  btn.textContent='Connecting...';
-  
-  try{
-    // Регистрация через API
-    const res=await fetch(`${API_URL}/api/auth/register`,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({username:u})
-    });
-    
-    if(!res.ok){
-      const err=await res.json();
-      if(err.detail==='Username already exists'){
-        // Пользователь уже существует, просто продолжаем
-        localStorage.setItem('crackprotocol_user',u);
-        window.location.href='terminal';
-      }else{
-        throw new Error(err.detail||'Registration failed');
-      }
-    }else{
-      // Успешная регистрация
-      localStorage.setItem('crackprotocol_user',u);
-      window.location.href='terminal';
-    }
-  }catch(err){
-    console.error('Error:',err);
-    // Откат на локальное хранение если API недоступен
-    localStorage.setItem('crackprotocol_user',u);
-    window.location.href='terminal';
-  }
-}
-
-document.getElementById('modal').addEventListener('click',function(e){if(e.target===this)closeM()});
-</script>
+<script src="unicorn-loader.js"></script>
+<script src="index.js"></script>
 </body>
 </html>
