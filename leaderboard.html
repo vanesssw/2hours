@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRACK PROTOCOL — Leaderboard</title>
+<link rel="icon" type="image/x-icon" href="images/favicon.jpg?v=1">
+<link rel="shortcut icon" type="image/x-icon" href="images/favicon.jpg?v=1">
+<link rel="apple-touch-icon" href="images/favicon.jpg">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;background:#000;color:#fff;font-family:'JetBrains Mono',monospace}
+
+.container{max-width:900px;margin:0 auto;padding:40px 20px}
+.header{text-align:center;margin-bottom:50px}
+.title{font-family:'Bebas Neue',sans-serif;font-size:48px;letter-spacing:0.08em;margin-bottom:10px}
+.subtitle{font-size:12px;color:rgba(255,255,255,0.3);letter-spacing:2px;text-transform:uppercase}
+
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;margin-bottom:50px}
+.stat-card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);padding:24px;text-align:center}
+.stat-value{font-size:32px;font-weight:700;color:#fff;margin-bottom:8px}
+.stat-label{font-size:10px;color:rgba(255,255,255,0.35);letter-spacing:2px;text-transform:uppercase}
+
+.board{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.08);padding:30px}
+.board-title{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:0.06em;margin-bottom:20px;text-align:center}
+
+.board-header,.board-row{display:grid;grid-template-columns:60px 1fr 140px;gap:20px;padding:12px 20px;align-items:center}
+.board-header{border-bottom:1px solid rgba(255,255,255,0.1);font-size:10px;color:rgba(255,255,255,0.4);letter-spacing:2px;text-transform:uppercase;font-weight:600}
+.board-row{border-bottom:1px solid rgba(255,255,255,0.04);transition:background 0.2s}
+.board-row:hover{background:rgba(255,255,255,0.03)}
+.board-row.highlight{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15)}
+
+.rank{font-size:20px;font-weight:700;color:rgba(255,255,255,0.6)}
+.rank.top1{color:#FFD700}
+.rank.top2{color:#C0C0C0}
+.rank.top3{color:#CD7F32}
+
+.username{font-size:14px;font-weight:500}
+.attempts{font-size:13px;color:rgba(255,255,255,0.5)}
+
+.back-btn{display:inline-block;margin-top:30px;padding:12px 32px;background:#fff;color:#000;text-decoration:none;text-transform:uppercase;font-size:11px;letter-spacing:2px;font-weight:600;transition:all 0.2s}
+.back-btn:hover{background:rgba(255,255,255,0.85)}
+
+.loading{text-align:center;padding:40px;color:rgba(255,255,255,0.3);font-size:12px}
+
+@media(max-width:768px){
+  .board-header,.board-row{grid-template-columns:50px 1fr 100px;gap:10px;padding:10px;font-size:11px}
+  .title{font-size:36px}
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <div class="title">LEADERBOARD</div>
+    <div class="subtitle">Top Hackers · CRACK PROTOCOL</div>
+  </div>
+
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-value" id="totalUsers">-</div>
+      <div class="stat-label">Total Players</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="totalAttempts">-</div>
+      <div class="stat-label">Total Attempts</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="yourRank">-</div>
+      <div class="stat-label">Your Rank</div>
+    </div>
+  </div>
+
+  <div class="board">
+    <div class="board-title">Top 50 Players</div>
+    <div class="board-header">
+      <div>Rank</div>
+      <div>Username</div>
+      <div>Attempts</div>
+    </div>
+    <div id="leaderboard">
+      <div class="loading">Loading leaderboard...</div>
+    </div>
+  </div>
+
+  <div style="text-align:center">
+    <a href="terminal" class="back-btn">← Back to Terminal</a>
+  </div>
+</div>
+
+<script>
+// API URL работает с Docker (через nginx proxy) и локально
+const API_URL=window.location.hostname==='localhost'&&window.location.port===''?'http://localhost:8000':'';
+const currentUser=localStorage.getItem('crackprotocol_user')||null;
+
+async function loadStats(){
+  try{
+    const url=currentUser?`${API_URL}/api/stats?username=${currentUser}`:`${API_URL}/api/stats`;
+    const res=await fetch(url);
+    const data=await res.json();
+    
+    document.getElementById('totalUsers').textContent=data.total_users;
+    document.getElementById('totalAttempts').textContent=data.total_attempts;
+    // Successful cracks hidden
+    document.getElementById('yourRank').textContent=data.your_rank||'N/A';
+  }catch(err){
+    console.error('Error loading stats:',err);
+  }
+}
+
+async function loadLeaderboard(){
+  try{
+    const res=await fetch(`${API_URL}/api/leaderboard?limit=50`);
+    const data=await res.json();
+    
+    const container=document.getElementById('leaderboard');
+    container.innerHTML='';
+    
+    if(data.length===0){
+      container.innerHTML='<div class="loading">No data yet. Be the first!</div>';
+      return;
+    }
+    
+    data.forEach(entry=>{
+      const row=document.createElement('div');
+      row.className='board-row';
+      
+      if(currentUser&&entry.username.toLowerCase()===currentUser.toLowerCase()){
+        row.classList.add('highlight');
+      }
+      
+      const rankClass=entry.rank===1?'top1':entry.rank===2?'top2':entry.rank===3?'top3':'';
+      
+      row.innerHTML=`
+        <div class="rank ${rankClass}">#${entry.rank}</div>
+        <div class="username">${entry.username}</div>
+        <div class="attempts">${entry.attempts_count} attempts</div>
+      `;
+      
+      container.appendChild(row);
+    });
+  }catch(err){
+    console.error('Error loading leaderboard:',err);
+    document.getElementById('leaderboard').innerHTML='<div class="loading">Error loading data. Make sure backend is running.</div>';
+  }
+}
+
+window.addEventListener('DOMContentLoaded',()=>{
+  loadStats();
+  loadLeaderboard();
+  
+  // Обновляем каждые 30 секунд
+  setInterval(()=>{
+    loadStats();
+    loadLeaderboard();
+  },30000);
+});
+</script>
+
+</body>
+</html>

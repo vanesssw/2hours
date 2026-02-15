@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRACK PROTOCOL</title>
+<link rel="icon" type="image/x-icon" href="images/favicon.jpg?v=1">
+<link rel="shortcut icon" type="image/x-icon" href="images/favicon.jpg?v=1">
+<link rel="apple-touch-icon" href="images/favicon.jpg">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@300;400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;background:#000;color:#fff;overflow-x:hidden}
+
+#unicorn-bg{position:fixed;inset:0;z-index:0;overflow:hidden}
+#unicorn-bg>div{width:100%!important;height:100%!important}
+
+.noise{position:fixed;inset:0;z-index:2;pointer-events:none;opacity:0.025;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:128px}
+
+.main{position:relative;z-index:10;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px}
+
+.top-chips{position:absolute;top:28px;left:50%;transform:translateX(-50%);display:flex;gap:12px;z-index:20;flex-wrap:wrap;justify-content:center}
+.chip{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);padding:10px 18px;font-family:'JetBrains Mono',monospace;font-size:12px;color:rgba(255,255,255,0.4);backdrop-filter:blur(40px)}
+.chip-val{color:#fff;font-weight:600}
+.chip-btn{background:transparent;border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.6);padding:3px 10px;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:all 0.25s}
+.chip-btn:hover{background:#fff;color:#000;border-color:#fff}
+.chip-btn svg{width:11px;height:11px;fill:currentColor}
+
+.hero{text-align:center;animation:up 0.8s ease both;margin-top:80px}
+@keyframes up{from{opacity:0;transform:translateY(24px)}}
+
+.hero-sub{font-family:'Instrument Serif',serif;font-style:italic;font-size:clamp(17px,2.4vw,26px);color:rgba(255,255,255,0.35);margin-bottom:48px}
+.line{width:1px;height:40px;background:rgba(255,255,255,0.08);margin:0 auto 36px}
+
+.enter-btn{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;letter-spacing:4px;text-transform:uppercase;color:#000;background:#fff;border:none;padding:16px 56px;cursor:pointer;transition:all 0.25s}
+.enter-btn:hover{background:rgba(255,255,255,0.82);transform:translateY(-1px)}
+
+.foot{position:absolute;bottom:28px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.1)}
+
+.m-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:1000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(20px)}
+.m-overlay.on{display:flex}
+.m-box{background:#080808;border:1px solid rgba(255,255,255,0.07);padding:48px 40px;width:90%;max-width:400px;animation:mIn 0.3s ease;position:relative}
+@keyframes mIn{from{opacity:0;transform:translateY(16px)}}
+.m-x{position:absolute;top:16px;right:20px;background:none;border:none;color:rgba(255,255,255,0.15);font-size:20px;cursor:pointer;font-family:'JetBrains Mono',monospace}
+.m-x:hover{color:#fff}
+.m-title{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:0.04em;color:#fff;margin-bottom:6px}
+.m-sub{font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(255,255,255,0.2);letter-spacing:1px;margin-bottom:32px}
+.m-field label{display:block;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.25);margin-bottom:8px}
+.m-field input{width:100%;background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,0.1);padding:12px 0;color:#fff;font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:500;letter-spacing:1px;outline:none;transition:border-color 0.3s}
+.m-field input:focus{border-color:rgba(255,255,255,0.4)}
+.m-field input::placeholder{color:rgba(255,255,255,0.1)}
+.m-btn{margin-top:36px;width:100%;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#000;background:#fff;border:none;padding:15px;cursor:pointer;transition:all 0.25s}
+.m-btn:hover{background:rgba(255,255,255,0.82)}
+.m-btn:disabled{opacity:0.12;cursor:not-allowed}
+
+.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(8px);background:#fff;color:#000;padding:10px 24px;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;opacity:0;transition:all 0.25s;z-index:9999;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media(max-width:600px){.top-chips{top:14px;gap:8px;padding:0 10px}.chip{padding:8px 12px;font-size:11px}.enter-btn{padding:14px 36px}.m-box{padding:36px 24px}.hero{margin-top:60px}}
+</style>
+</head>
+<body>
+
+<div id="unicorn-bg">
+  <div data-us-project="mF5tdiaJ7VwKwWi4TdaR" style="width:1440px; height: 900px"></div>
+</div>
+<div class="noise"></div>
+
+<div class="main">
+  <div class="top-chips">
+    <div class="chip">
+      CA: <span class="chip-val">SOON</span>
+      <button class="chip-btn" onclick="copyCA()">
+        <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+        Copy
+      </button>
+    </div>
+    <div class="chip">
+      X: <span class="chip-val">@XACCOUNT</span>
+      <a href="https://x.com/XACCOUNT" target="_blank" class="chip-btn">
+        <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        Open
+      </a>
+    </div>
+  </div>
+
+  <div class="hero">
+    <p class="hero-sub">Initiate the breach. Break the machine.</p>
+    <div class="line"></div>
+    <button class="enter-btn" onclick="openM()">Enter</button>
+  </div>
+
+  <div class="foot">Quantum Encrypted &middot; Solana Network</div>
+</div>
+
+<div class="m-overlay" id="modal">
+  <div class="m-box">
+    <button class="m-x" onclick="closeM()">×</button>
+    <div class="m-title">IDENTIFY</div>
+    <div class="m-sub">Create your handle to proceed</div>
+    <div class="m-field">
+      <label>Username</label>
+      <input type="text" id="uInput" placeholder="agent_" maxlength="20" autocomplete="off"/>
+    </div>
+    <button class="m-btn" id="goBtn" onclick="go()" disabled>Proceed</button>
+  </div>
+</div>
+
+<div class="toast" id="toast">Copied</div>
+
+<script type="text/javascript">
+!function(){var u=window.UnicornStudio;if(u&&u.init){if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){u.init()})}else{u.init()}}else{window.UnicornStudio={isInitialized:!1};var i=document.createElement("script");i.src="https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v2.0.5/dist/unicornStudio.umd.js",i.onload=function(){if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){UnicornStudio.init()})}else{UnicornStudio.init()}},(document.head||document.body).appendChild(i)}}();
+</script>
+<script>
+function copyCA(){navigator.clipboard.writeText('SOON').then(()=>{const t=document.getElementById('toast');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1500)})}
+function openM(){document.getElementById('modal').classList.add('on');setTimeout(()=>document.getElementById('uInput').focus(),200)}
+function closeM(){document.getElementById('modal').classList.remove('on')}
+document.getElementById('uInput').addEventListener('input',function(){document.getElementById('goBtn').disabled=this.value.trim().length<2});
+document.getElementById('uInput').addEventListener('keydown',function(e){if(e.key==='Enter'&&this.value.trim().length>=2)go()});
+
+// API URL работает с Docker (через nginx proxy) и локально
+const API_URL=window.location.hostname==='localhost'&&window.location.port===''?'http://localhost:8000':'';
+
+async function go(){
+  const u=document.getElementById('uInput').value.trim();
+  if(u.length<2)return;
+  
+  const btn=document.getElementById('goBtn');
+  btn.disabled=true;
+  btn.textContent='Connecting...';
+  
+  try{
+    // Регистрация через API
+    const res=await fetch(`${API_URL}/api/auth/register`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({username:u})
+    });
+    
+    if(!res.ok){
+      const err=await res.json();
+      if(err.detail==='Username already exists'){
+        // Пользователь уже существует, просто продолжаем
+        localStorage.setItem('crackprotocol_user',u);
+        window.location.href='terminal';
+      }else{
+        throw new Error(err.detail||'Registration failed');
+      }
+    }else{
+      // Успешная регистрация
+      localStorage.setItem('crackprotocol_user',u);
+      window.location.href='terminal';
+    }
+  }catch(err){
+    console.error('Error:',err);
+    // Откат на локальное хранение если API недоступен
+    localStorage.setItem('crackprotocol_user',u);
+    window.location.href='terminal';
+  }
+}
+
+document.getElementById('modal').addEventListener('click',function(e){if(e.target===this)closeM()});
+</script>
+</body>
+</html>

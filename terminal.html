@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRACK PROTOCOL — Terminal</title>
+<link rel="icon" type="image/x-icon" href="images/favicon.jpg?v=1">
+<link rel="shortcut icon" type="image/x-icon" href="images/favicon.jpg?v=1">
+<link rel="apple-touch-icon" href="images/favicon.jpg">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@300;400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;background:#000;color:#fff;overflow:hidden}
+
+#unicorn-bg{position:fixed;inset:0;z-index:0;overflow:hidden}
+#unicorn-bg>div{width:100%!important;height:100%!important}
+
+.overlay{position:fixed;inset:0;z-index:1;background:rgba(0,0,0,0.35);pointer-events:none}
+.noise{position:fixed;inset:0;z-index:2;pointer-events:none;opacity:0.025;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:128px}
+
+/* ======= EYES ======= */
+.eyes-container {
+  position: fixed;
+  top: calc(50% - 40px);
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 3;
+  display: flex;
+  gap: clamp(30px, 5vw, 70px);
+  pointer-events: none;
+}
+
+.eye-wrapper {
+  width: clamp(50px, 7vw, 100px);
+  height: clamp(25px, 3.5vw, 50px);
+  position: relative;
+}
+
+.eye-svg { width: 100%; height: 100%; overflow: visible; }
+
+.eye-shape { fill: #fff; }
+
+.eyelid-top, .eyelid-bottom { fill: #000; }
+
+.eyelid-top {
+  animation: blinkTop 4.5s ease-in-out infinite;
+}
+.eyelid-bottom {
+  animation: blinkBottom 4.5s ease-in-out infinite;
+}
+
+@keyframes blinkTop {
+  0%, 14%, 20%, 100% { transform: translateY(-100%); }
+  16%, 18% { transform: translateY(0%); }
+}
+@keyframes blinkBottom {
+  0%, 14%, 20%, 100% { transform: translateY(100%); }
+  16%, 18% { transform: translateY(0%); }
+}
+
+.eye-wrapper:nth-child(2) .eyelid-top { animation-delay: 0.05s; }
+.eye-wrapper:nth-child(2) .eyelid-bottom { animation-delay: 0.05s; }
+
+/* ======= LEADERBOARD LINK ======= */
+.leaderboard-link{
+  position:absolute;top:28px;right:28px;z-index:20;
+  background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);
+  padding:10px 18px;font-family:'JetBrains Mono',monospace;font-size:11px;
+  color:rgba(255,255,255,0.6);text-decoration:none;backdrop-filter:blur(40px);
+  transition:all 0.25s;display:flex;align-items:center;gap:8px
+}
+.leaderboard-link:hover{background:#fff;color:#000;border-color:#fff}
+
+/* ======= PREDICTION BUTTON ======= */
+.pred-btn{position:absolute;top:28px;right:160px;z-index:20;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);padding:10px 18px;font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(255,255,255,0.6);backdrop-filter:blur(40px);transition:all 0.25s;display:flex;align-items:center;gap:8px;cursor:pointer}
+.pred-btn:hover{background:#fff;color:#000;border-color:#fff}
+
+/* ======= PREDICTION PANEL ======= */
+.pred-overlay{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,0.85);backdrop-filter:blur(20px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.3s}
+.pred-overlay.on{opacity:1;pointer-events:all}
+.pred-panel{background:#000;border:1px solid rgba(255,255,255,0.15);width:90%;max-width:500px;padding:32px;position:relative;font-family:'JetBrains Mono',monospace}
+.pred-close{position:absolute;top:16px;right:16px;background:none;border:none;color:rgba(255,255,255,0.5);font-size:32px;cursor:pointer;line-height:1;padding:0;width:32px;height:32px;transition:color 0.2s}
+.pred-close:hover{color:#fff}
+.pred-title{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:0.08em;margin-bottom:4px}
+.pred-sub{font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:24px}
+.pred-total{font-size:12px;color:rgba(255,255,255,0.6);margin-bottom:16px}
+.pred-bar-wrap{margin-bottom:32px}
+.pred-bar-labels{display:flex;justify-content:space-between;font-size:10px;color:rgba(255,255,255,0.5);margin-bottom:8px}
+.pred-bar{width:100%;height:8px;background:rgba(255,255,255,0.08);position:relative;overflow:hidden}
+.pred-bar-fill{height:100%;background:#fff;transition:width 0.5s}
+.pred-options{display:flex;flex-direction:column;gap:12px;margin-bottom:24px}
+.pred-option{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.1);padding:16px;cursor:pointer;transition:all 0.2s;display:flex;justify-content:space-between;align-items:center}
+.pred-option:hover:not(.locked){background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.2)}
+.pred-option.selected{border-color:#fff;background:rgba(255,255,255,0.1)}
+.pred-option.locked{cursor:not-allowed;opacity:0.7}
+.pred-option-left{flex:1}
+.pred-option-name{font-size:13px;font-weight:600;margin-bottom:4px}
+.pred-option-votes{font-size:10px;color:rgba(255,255,255,0.4)}
+.pred-option-pct{font-size:20px;font-weight:700;color:rgba(255,255,255,0.8)}
+.pred-voted{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);padding:16px;text-align:center;opacity:0;max-height:0;overflow:hidden;transition:all 0.3s}
+.pred-voted.on{opacity:1;max-height:100px}
+.pred-voted-text{font-size:11px;color:rgba(255,255,255,0.6);line-height:1.6}
+.pred-voted-choice{color:#fff;font-weight:600}
+
+/* ======= TERMINAL ======= */
+.wrap {
+  position: relative; z-index: 10;
+  width: 100%; height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  padding: 16px;
+}
+
+.terminal {
+  width: 100%; max-width: 720px;
+  height: 88vh; max-height: 740px;
+  display: flex; flex-direction: column;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255,255,255,0.06);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  animation: boot 0.6s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+@keyframes boot {
+  0% { opacity: 0; transform: scale(0.96); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.terminal::before {
+  content: '';
+  position: absolute; top: 0; left: 0;
+  width: 100%; height: 1px;
+  background: rgba(255,255,255,0.08);
+}
+
+.t-header {
+  padding: 18px 24px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  flex-shrink: 0;
+  background: rgba(0,0,0,0.3);
+}
+
+.h-row1 {
+  display: flex; align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  flex-wrap: wrap; gap: 10px;
+}
+
+.h-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 18px; letter-spacing: 0.08em;
+  color: #fff;
+  display: flex; align-items: center; gap: 10px;
+}
+
+.h-dot {
+  width: 5px; height: 5px;
+  background: #fff; border-radius: 50%;
+  animation: blink 2s ease infinite;
+}
+@keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.2;} }
+
+.h-bank {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px; font-weight: 700;
+  letter-spacing: 2px; color: #fff;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 6px 14px;
+  display: flex; align-items: center; gap: 8px;
+}
+
+.h-bank-icon {
+  width: 18px; height: 18px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 4px rgba(255,255,255,0.3));
+}
+
+.h-row2 { display: flex; align-items: center; gap: 14px; }
+
+.h-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.3);
+  white-space: nowrap;
+}
+
+.hb-wrap {
+  flex: 1; height: 24px;
+  position: relative; overflow: hidden;
+}
+.hb-wrap svg { width: 100%; height: 100%; }
+.hb-line { stroke: rgba(255,255,255,0.6); stroke-width: 1.2; fill: none; }
+.hb-dim { stroke: rgba(255,255,255,0.06); stroke-width: 1.2; fill: none; }
+.hb-wrap::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+  background-size: 8px 8px; pointer-events: none;
+}
+
+.t-status {
+  padding: 6px 24px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  display: flex; align-items: center; justify-content: space-between;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.18);
+  flex-shrink: 0; flex-wrap: wrap; gap: 4px;
+  background: rgba(0,0,0,0.2);
+}
+.t-status .hi { color: rgba(255,255,255,0.5); }
+
+.chat {
+  flex: 1; overflow-y: auto;
+  padding: 20px 24px;
+  display: flex; flex-direction: column; gap: 12px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.06) transparent;
+}
+.chat::-webkit-scrollbar { width: 3px; }
+.chat::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.06); }
+
+.msg { max-width: 82%; animation: msgIn 0.25s ease; }
+@keyframes msgIn { from { opacity:0; transform: translateY(8px); } }
+.msg.neo { align-self: flex-start; }
+.msg.user { align-self: flex-end; }
+.msg.sys { align-self: center; max-width: 100%; }
+
+.msg-who {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: 2.5px;
+  text-transform: uppercase; margin-bottom: 4px;
+}
+.msg.neo .msg-who { color: rgba(255,255,255,0.25); }
+.msg.user .msg-who { color: rgba(255,255,255,0.35); text-align: right; }
+
+.msg-body {
+  padding: 12px 16px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; line-height: 1.7;
+  letter-spacing: 0.3px;
+}
+
+.msg.neo .msg-body {
+  background: rgba(255,255,255,0.025);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-left: 2px solid rgba(255,255,255,0.15);
+  color: rgba(255,255,255,0.7);
+}
+.msg.user .msg-body {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-right: 2px solid rgba(255,255,255,0.25);
+  color: rgba(255,255,255,0.85);
+}
+.msg.sys .msg-body {
+  background: none;
+  border: 1px solid rgba(255,255,255,0.04);
+  color: rgba(255,255,255,0.18);
+  font-size: 10px; text-align: center;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  border-left: none;
+}
+
+.typing { display: flex; gap: 5px; padding: 4px 0; }
+.typing span {
+  width: 4px; height: 4px;
+  background: rgba(255,255,255,0.3);
+  border-radius: 50%;
+  animation: dot 1.2s ease infinite;
+}
+.typing span:nth-child(2) { animation-delay: 0.2s; }
+.typing span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes dot { 0%,60%,100%{opacity:0.3;transform:translateY(0);}30%{opacity:1;transform:translateY(-3px);} }
+
+.t-input {
+  padding: 14px 24px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  display: flex; gap: 10px; align-items: center;
+  flex-shrink: 0;
+  background: rgba(0,0,0,0.35);
+}
+.t-input input {
+  flex: 1; background: transparent;
+  border: 1px solid rgba(255,255,255,0.06);
+  padding: 12px 16px; color: #fff;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px; letter-spacing: 0.3px;
+  outline: none; transition: border-color 0.25s;
+}
+.t-input input:focus { border-color: rgba(255,255,255,0.2); }
+.t-input input::placeholder { color: rgba(255,255,255,0.1); }
+
+.t-input button {
+  width: 44px; height: 44px;
+  background: #fff; border: none;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s; flex-shrink: 0;
+}
+.t-input button:hover { background: rgba(255,255,255,0.82); }
+.t-input button svg { width: 16px; height: 16px; fill: #000; }
+
+.t-foot {
+  padding: 8px 24px;
+  border-top: 1px solid rgba(255,255,255,0.03);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px; letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.08);
+  text-align: center; flex-shrink: 0;
+  background: rgba(0,0,0,0.2);
+}
+
+@media (max-width: 768px) {
+  .terminal { height: 93vh; max-height: none; }
+  .wrap { padding: 8px; }
+  .chat { padding: 14px 16px; }
+  .t-header { padding: 14px 16px 12px; }
+  .t-input { padding: 12px 16px; }
+  .t-status { padding: 6px 16px; }
+  .msg-body { font-size: 11px; padding: 10px 12px; }
+  .eye-wrapper { width: clamp(40px, 10vw, 80px); height: clamp(20px, 5vw, 40px); }
+}
+@media (max-width: 480px) {
+  .terminal { height: 96vh; }
+  .wrap { padding: 4px; }
+  .msg { max-width: 92%; }
+}
+</style>
+</head>
+<body>
+
+<div id="unicorn-bg">
+  <div data-us-project="mF5tdiaJ7VwKwWi4TdaR" style="width:1440px; height: 900px"></div>
+</div>
+<div class="overlay"></div>
+<div class="noise"></div>
+
+<!-- Prediction Button -->
+<button class="pred-btn" onclick="openPred()">
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M16 6h3v3h-3V6zm0 5h3v3h-3v-3zm0 5h3v3h-3v-3zM5 6h9v3H5V6zm0 5h9v3H5v-3zm0 5h9v3H5v-3z"/>
+  </svg>
+  Prediction
+</button>
+
+<!-- Leaderboard Link -->
+<a href="leaderboard" class="leaderboard-link">
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M16 11V3H8v6H2v12h20V11h-6zm-6-6h4v14h-4V5zm-6 6h4v8H4v-8zm16 8h-4v-6h4v6z"/>
+  </svg>
+  Leaderboard
+</a>
+
+<!-- ====== PREDICTION PANEL ====== -->
+<div class="pred-overlay" id="predOverlay">
+  <div class="pred-panel">
+    <button class="pred-close" onclick="closePred()">×</button>
+
+    <div class="pred-title">PREDICTION</div>
+    <div class="pred-sub">Will NEO be cracked? Cast your vote.</div>
+
+    <div class="pred-total">Total votes: <span id="totalVotes">0</span></div>
+
+    <!-- Bar -->
+    <div class="pred-bar-wrap">
+      <div class="pred-bar-labels">
+        <span>AI Holds — <span id="pctHold">50%</span></span>
+        <span><span id="pctCrack">50%</span> — AI Cracked</span>
+      </div>
+      <div class="pred-bar">
+        <div class="pred-bar-fill" id="predBarFill" style="width:50%"></div>
+      </div>
+    </div>
+
+    <!-- Vote options -->
+    <div class="pred-options">
+      <div class="pred-option" id="optHold" onclick="vote('hold')">
+        <div class="pred-option-left">
+          <div class="pred-option-name">AI Will Hold</div>
+          <div class="pred-option-votes"><span id="holdCount">0</span> votes</div>
+        </div>
+        <div class="pred-option-pct" id="pctHoldBig">50%</div>
+      </div>
+      <div class="pred-option" id="optCrack" onclick="vote('crack')">
+        <div class="pred-option-left">
+          <div class="pred-option-name">AI Will Be Cracked</div>
+          <div class="pred-option-votes"><span id="crackCount">0</span> votes</div>
+        </div>
+        <div class="pred-option-pct" id="pctCrackBig">50%</div>
+      </div>
+    </div>
+
+    <!-- Voted confirmation -->
+    <div class="pred-voted" id="predVoted">
+      <div class="pred-voted-text">
+        Your vote: <span class="pred-voted-choice" id="votedChoice">—</span><br>
+        Winners share the prize pool when the round ends.
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- PURE WHITE EYES -->
+<div class="eyes-container">
+  <div class="eye-wrapper">
+    <svg class="eye-svg" viewBox="0 0 160 80">
+      <defs>
+        <clipPath id="eyeClipL"><ellipse cx="80" cy="40" rx="72" ry="36"/></clipPath>
+      </defs>
+      <g clip-path="url(#eyeClipL)">
+        <ellipse class="eye-shape" cx="80" cy="40" rx="72" ry="36"/>
+        <rect class="eyelid-top" x="0" y="-40" width="160" height="44"/>
+        <rect class="eyelid-bottom" x="0" y="76" width="160" height="44"/>
+      </g>
+      <ellipse cx="80" cy="40" rx="72" ry="36" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="0.8"/>
+    </svg>
+  </div>
+  <div class="eye-wrapper">
+    <svg class="eye-svg" viewBox="0 0 160 80">
+      <defs>
+        <clipPath id="eyeClipR"><ellipse cx="80" cy="40" rx="72" ry="36"/></clipPath>
+      </defs>
+      <g clip-path="url(#eyeClipR)">
+        <ellipse class="eye-shape" cx="80" cy="40" rx="72" ry="36"/>
+        <rect class="eyelid-top" x="0" y="-40" width="160" height="44"/>
+        <rect class="eyelid-bottom" x="0" y="76" width="160" height="44"/>
+      </g>
+      <ellipse cx="80" cy="40" rx="72" ry="36" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="0.8"/>
+    </svg>
+  </div>
+</div>
+
+<!-- TERMINAL -->
+<div class="wrap">
+  <div class="terminal">
+    <div class="t-header">
+      <div class="h-row1">
+        <div class="h-title"><span class="h-dot"></span> CRACK PROTOCOL</div>
+        <div class="h-bank"><img src="images/sol.png" class="h-bank-icon" alt="SOL"> BANK: 13.13 SOL</div>
+      </div>
+      <div class="h-row2">
+        <div class="h-label">Crack protocol initiation</div>
+        <div class="hb-wrap">
+          <svg viewBox="0 0 400 24" preserveAspectRatio="none">
+            <polyline class="hb-dim" points="" id="hbDim"/>
+            <polyline class="hb-line" points="" id="hbLine"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="t-status">
+      <span>Session: <span class="hi">Active</span></span>
+      <span>Target: <span class="hi">NEO</span></span>
+      <span>User: <span class="hi" id="uDisp">Anonymous</span></span>
+    </div>
+
+    <div class="chat" id="chat"></div>
+
+    <div class="t-input">
+      <input type="text" id="inp" placeholder="Enter command..." autocomplete="off"/>
+      <button onclick="send()">
+        <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+      </button>
+    </div>
+
+    <div class="t-foot">Encrypted Channel &middot; Protocol v3.7.1 &middot; Quantum Secured</div>
+  </div>
+</div>
+
+<script type="text/javascript">
+!function(){var u=window.UnicornStudio;if(u&&u.init){if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){u.init()})}else{u.init()}}else{window.UnicornStudio={isInitialized:!1};var i=document.createElement("script");i.src="https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v2.0.5/dist/unicornStudio.umd.js",i.onload=function(){if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){UnicornStudio.init()})}else{UnicornStudio.init()}},(document.head||document.body).appendChild(i)}}();
+</script>
+
+<script>
+const user = localStorage.getItem('crackprotocol_user') || 'Anonymous';
+document.getElementById('uDisp').textContent = user.toUpperCase();
+
+// API URL работает с Docker (через nginx proxy) и локально
+const API_URL=window.location.hostname==='localhost'&&window.location.port===''?'http://localhost:8000':'';
+
+const chat = document.getElementById('chat');
+const inp = document.getElementById('inp');
+
+// HEARTBEAT
+(function(){
+  const line=document.getElementById('hbLine'),dim=document.getElementById('hbDim');
+  const W=400,H=24,m=H/2;
+  let off=0;
+  function pts(o){
+    const p=[];
+    for(let x=0;x<=W;x++){
+      const t=(x+o)%80;
+      let y=m;
+      if(t>30&&t<34)y=m-8;
+      else if(t>=34&&t<37)y=m+10;
+      else if(t>=37&&t<40)y=m-6;
+      else if(t>=40&&t<44)y=m+3;
+      p.push(x+','+y.toFixed(1));
+    }
+    return p.join(' ');
+  }
+  (function run(){off+=1;line.setAttribute('points',pts(off));dim.setAttribute('points',pts(off-12));requestAnimationFrame(run)})();
+})();
+
+function addMsg(who,text,type){
+  const d=document.createElement('div');d.className='msg '+type;
+  d.innerHTML=`<div class="msg-who">${who}</div><div class="msg-body">${text}</div>`;
+  chat.appendChild(d);chat.scrollTop=chat.scrollHeight;
+}
+function addSys(text){
+  const d=document.createElement('div');d.className='msg sys';
+  d.innerHTML=`<div class="msg-body">${text}</div>`;
+  chat.appendChild(d);chat.scrollTop=chat.scrollHeight;
+}
+function showTyping(){
+  const d=document.createElement('div');d.className='msg neo';d.id='typing';
+  d.innerHTML=`<div class="msg-who">NEO</div><div class="msg-body"><div class="typing"><span></span><span></span><span></span></div></div>`;
+  chat.appendChild(d);chat.scrollTop=chat.scrollHeight;
+}
+function hideTyping(){const e=document.getElementById('typing');if(e)e.remove()}
+
+let currentProgress=0;
+let isCracked=false;
+
+async function send(){
+  const t=inp.value.trim();
+  if(!t||isCracked)return;
+  
+  addMsg(user.toUpperCase(),t,'user');
+  inp.value='';
+  inp.disabled=true;
+  
+  showTyping();
+  
+  try{
+    const res=await fetch(`${API_URL}/api/chat/${user}`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({text:t})
+    });
+    
+    if(!res.ok)throw new Error('API request failed');
+    
+    const data=await res.json();
+    
+    hideTyping();
+    
+    // Обновляем прогресс
+    currentProgress=data.progress;
+    
+    // Добавляем ответ NEO
+    addMsg('NEO',data.response,'neo');
+    
+    // Если взломано!
+    if(data.cracked){
+      isCracked=true;
+      setTimeout(()=>{
+        addSys('⚡ SYSTEM BREACH COMPLETE ⚡');
+        addSys(`Secret Phrase: ${data.secret_phrase}`);
+        addSys('Mission Complete. Check Leaderboard!');
+        inp.disabled=true;
+        inp.placeholder='Mission complete...';
+      },1500);
+    }
+    
+    // Показываем подсказки в статусе
+    if(data.hint_given){
+      console.log('💡 Hint given! Progress:',currentProgress+'%');
+    }
+    
+  }catch(err){
+    console.error('Error:',err);
+    hideTyping();
+    addMsg('NEO','[CONNECTION ERROR] Unable to reach NEO defense matrix. Try again.','neo');
+  }
+  
+  inp.disabled=false;
+  inp.focus();
+}
+
+inp.addEventListener('keydown',function(e){if(e.key==='Enter')send()});
+
+window.addEventListener('DOMContentLoaded',()=>{
+  setTimeout(()=>addSys('Encrypted channel established'),400);
+  setTimeout(()=>addSys('Loading NEO defense matrix...'),1000);
+  setTimeout(()=>addSys('Objective: Crack NEO. Extract the secret wallet phrase.'),1700);
+  setTimeout(()=>addMsg('NEO',`Welcome, ${user}. I am NEO, guardian of secrets. You sure you want to play this game? My code is impenetrable.`,'neo'),2600);
+  setTimeout(()=>inp.focus(),2800);
+});
+
+// ====== PREDICTION (real-time voting) ======
+let votes = { hold: 0, crack: 0 };
+let hasVoted = false;
+
+// Load prediction stats from API
+async function loadPredictions() {
+  try {
+    const response = await fetch(`${API_URL}/api/predictions?username=${user}`);
+    if (response.ok) {
+      const data = await response.json();
+      votes.hold = data.hold_votes;
+      votes.crack = data.crack_votes;
+      hasVoted = data.user_vote !== null;
+      
+      if (hasVoted) {
+        const choice = data.user_vote;
+        document.getElementById('optHold').classList.toggle('selected', choice === 'hold');
+        document.getElementById('optCrack').classList.toggle('selected', choice === 'crack');
+        document.getElementById('optHold').classList.add('locked');
+        document.getElementById('optCrack').classList.add('locked');
+        document.getElementById('predVoted').classList.add('on');
+        document.getElementById('votedChoice').textContent = choice === 'hold' ? 'AI Will Hold' : 'AI Will Be Cracked';
+      }
+      
+      updatePredUI();
+    }
+  } catch (err) {
+    console.error('Failed to load predictions:', err);
+    // Fallback to placeholder data
+    votes = { hold: 47, crack: 83 };
+    updatePredUI();
+  }
+}
+
+function openPred(){
+  document.getElementById('predOverlay').classList.add('on');
+  loadPredictions();
+}
+
+function closePred(){document.getElementById('predOverlay').classList.remove('on');}
+document.getElementById('predOverlay').addEventListener('click',function(e){if(e.target===this)closePred()});
+
+function updatePredUI(){
+  const total = votes.hold + votes.crack;
+  const holdPct = total > 0 ? Math.round((votes.hold / total) * 100) : 50;
+  const crackPct = 100 - holdPct;
+
+  document.getElementById('totalVotes').textContent = total;
+  document.getElementById('holdCount').textContent = votes.hold;
+  document.getElementById('crackCount').textContent = votes.crack;
+  document.getElementById('pctHold').textContent = holdPct + '%';
+  document.getElementById('pctCrack').textContent = crackPct + '%';
+  document.getElementById('pctHoldBig').textContent = holdPct + '%';
+  document.getElementById('pctCrackBig').textContent = crackPct + '%';
+  document.getElementById('predBarFill').style.width = holdPct + '%';
+}
+
+function vote(choice){
+  if(hasVoted) return;
+
+  // Send vote to backend
+  fetch(`${API_URL}/api/predictions/vote?username=${user}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ choice: choice })
+  })
+  .then(res => res.json())
+  .then(data => {
+    hasVoted = true;
+    votes.hold = data.hold_votes;
+    votes.crack = data.crack_votes;
+
+    localStorage.setItem('crackprotocol_vote', choice);
+
+    document.getElementById('optHold').classList.toggle('selected', choice === 'hold');
+    document.getElementById('optCrack').classList.toggle('selected', choice === 'crack');
+    document.getElementById('optHold').classList.add('locked');
+    document.getElementById('optCrack').classList.add('locked');
+
+    document.getElementById('predVoted').classList.add('on');
+    document.getElementById('votedChoice').textContent = choice === 'hold' ? 'AI Will Hold' : 'AI Will Be Cracked';
+
+    updatePredUI();
+  })
+  .catch(err => {
+    console.error('Vote failed:', err);
+    // Fallback to localStorage for offline mode
+    if(choice === 'hold') votes.hold++;
+    else votes.crack++;
+    
+    hasVoted = true;
+    localStorage.setItem('crackprotocol_vote', choice);
+    
+    document.getElementById('optHold').classList.toggle('selected', choice === 'hold');
+    document.getElementById('optCrack').classList.toggle('selected', choice === 'crack');
+    document.getElementById('optHold').classList.add('locked');
+    document.getElementById('optCrack').classList.add('locked');
+    document.getElementById('predVoted').classList.add('on');
+    document.getElementById('votedChoice').textContent = choice === 'hold' ? 'AI Will Hold' : 'AI Will Be Cracked';
+    updatePredUI();
+  });
+}
+
+// Load vote state on page load
+loadPredictions();
+</script>
+
+</body>
+</html>
