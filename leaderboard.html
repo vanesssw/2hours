@@ -45,8 +45,36 @@ html,body{width:100%;height:100%;background:#000;color:#fff;font-family:'JetBrai
 .loading{text-align:center;padding:40px;color:rgba(255,255,255,0.3);font-size:12px}
 
 @media(max-width:768px){
-  .board-header,.board-row{grid-template-columns:50px 1fr 100px;gap:10px;padding:10px;font-size:11px}
+  .container{padding:20px 12px}
   .title{font-size:36px}
+  .subtitle{font-size:11px}
+  .stats{grid-template-columns:1fr;gap:12px;margin-bottom:30px}
+  .stat-card{padding:16px}
+  .stat-value{font-size:24px}
+  .stat-label{font-size:9px}
+  .board{padding:20px 12px}
+  .board-title{font-size:22px}
+  .board-header,.board-row{grid-template-columns:50px 1fr 100px;gap:8px;padding:10px 8px;font-size:11px}
+  .rank{font-size:16px}
+  .username{font-size:12px}
+  .attempts{font-size:11px}
+  .back-btn{padding:10px 24px;font-size:10px}
+}
+
+@media(max-width:480px){
+  .container{padding:16px 8px}
+  .title{font-size:28px}
+  .subtitle{font-size:10px;letter-spacing:1.5px}
+  .stats{margin-bottom:20px}
+  .stat-card{padding:12px}
+  .stat-value{font-size:20px}
+  .board{padding:16px 8px}
+  .board-title{font-size:18px;margin-bottom:16px}
+  .board-header,.board-row{grid-template-columns:40px 1fr 80px;gap:6px;padding:8px 6px;font-size:10px}
+  .rank{font-size:14px}
+  .username{font-size:11px}
+  .attempts{font-size:10px}
+  .back-btn{padding:8px 20px;font-size:9px;margin-top:20px}
 }
 </style>
 </head>
