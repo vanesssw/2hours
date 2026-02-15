@@ -1,7 +1,9 @@
 // Главная страница CRACK PROTOCOL - логика регистрации и навигации
 
 function copyCA(){
-  navigator.clipboard.writeText('SOON').then(()=>{
+  const caSpan = document.querySelector('.chip-val[data-ca]');
+  const fullCA = caSpan.getAttribute('data-ca');
+  navigator.clipboard.writeText(fullCA).then(()=>{
     const t=document.getElementById('toast');
     t.classList.add('show');
     setTimeout(()=>t.classList.remove('show'),1500)

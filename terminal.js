@@ -1,4 +1,16 @@
 
+function copyCA(btn){
+  const caSpan = btn.parentElement.querySelector('.ca-val');
+  const fullCA = caSpan.getAttribute('data-ca');
+  navigator.clipboard.writeText(fullCA).then(()=>{
+    const orig = btn.innerHTML;
+    btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>Copied!';
+    setTimeout(()=>btn.innerHTML = orig, 1500);
+  }).catch(err=>{
+    console.error('Copy failed:', err);
+  });
+}
+
 const user = localStorage.getItem('crackprotocol_user') || 'Anonymous';
 document.getElementById('uDisp').textContent = user.toUpperCase();
 

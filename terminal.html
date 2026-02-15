@@ -62,6 +62,25 @@ html,body{width:100%;height:100%;background:#000;color:#fff;overflow:hidden}
 .eye-wrapper:nth-child(2) .eyelid-top { animation-delay: 0.05s; }
 .eye-wrapper:nth-child(2) .eyelid-bottom { animation-delay: 0.05s; }
 
+/* ======= CA CHIP ======= */
+.ca-chip{
+  position:absolute;top:28px;left:28px;z-index:20;
+  background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);
+  padding:10px 18px;font-family:'JetBrains Mono',monospace;font-size:11px;
+  color:rgba(255,255,255,0.4);backdrop-filter:blur(40px);
+  display:flex;align-items:center;gap:12px
+}
+.ca-val{color:rgba(255,255,255,0.8);font-weight:600}
+.ca-btn{
+  background:transparent;border:1px solid rgba(255,255,255,0.12);
+  color:rgba(255,255,255,0.6);padding:3px 10px;
+  font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:500;
+  letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;
+  display:inline-flex;align-items:center;gap:6px;transition:all 0.25s
+}
+.ca-btn:hover{background:#fff;color:#000;border-color:#fff}
+.ca-btn svg{width:12px;height:12px;fill:currentColor}
+
 /* ======= LEADERBOARD LINK ======= */
 .leaderboard-link{
   position:absolute;top:28px;right:28px;z-index:20;
@@ -336,6 +355,9 @@ html,body{width:100%;height:100%;background:#000;color:#fff;overflow:hidden}
   .eyes-container { top: calc(50% - 60px); gap: 20px; }
   
   /* Mobile buttons stack */
+  .ca-chip { top: 12px; left: 12px; padding: 8px 12px; font-size: 10px; gap: 8px; }
+  .ca-btn { padding: 3px 8px; font-size: 9px; }
+  .ca-btn svg { width: 10px; height: 10px; }
   .leaderboard-link { top: 12px; right: 12px; padding: 8px 12px; font-size: 10px; }
   .pred-btn { position: static; margin: 12px; display: inline-flex; padding: 8px 12px; font-size: 10px; }
   
@@ -350,6 +372,10 @@ html,body{width:100%;height:100%;background:#000;color:#fff;overflow:hidden}
 }
 
 @media (max-width: 480px) {
+  .ca-chip { top: 8px; left: 8px; padding: 6px 10px; font-size: 9px; }
+  .ca-val { font-size: 10px; }
+  .ca-btn { padding: 2px 6px; font-size: 8px; letter-spacing: 1px; }
+  .ca-btn svg { width: 9px; height: 9px; }
   .terminal { height: 96vh; width: 98%; }
   .wrap { padding: 4px; }
   .msg { max-width: 94%; }
@@ -372,6 +398,14 @@ html,body{width:100%;height:100%;background:#000;color:#fff;overflow:hidden}
 </div>
 <div class="overlay"></div>
 <div class="noise"></div>
+
+<div class="ca-chip">
+  CA: <span class="ca-val" data-ca="SOON">SOON</span>
+  <button class="ca-btn" onclick="copyCA(this)">
+    <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+    Copy
+  </button>
+</div>
 
 <button class="pred-btn" onclick="openPred()">
   <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
